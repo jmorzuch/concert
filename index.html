@@ -450,9 +450,11 @@
 /* ════════════════════════════════════════════════════════════════════
    DATA LAYER
    Live artist data (name, photo, fan count) comes from TheAudiodb —
-   https://theaudiodb.com/api/v1/json/2/search.php?s=<name>  (free key 2)
-   CORS-open (Access-Control-Allow-Origin: *), real intFollowers counts
-   and CDN artist images. Deezer was retired from this app: it now
+   https://www.theaudiodb.com/api/v1/json/2/search.php?s=<name>  (free key 2)
+   CORS-open (Access-Control-Allow-Origin: *) — but only on the www host.
+   The bare host 301-redirects to www with NO CORS header, and browsers
+   enforce CORS on the redirect hop, so the bare host must never be called.
+   Real intFollowers counts and CDN artist images (r2.theaudiodb.com, clean 200). Deezer was retired from this app: it now
    serves Access-Control-Allow-Credentials without
    Access-Control-Allow-Origin, which browsers reject.
    There is no 0–100 popularity field, so the popularity score shown is
@@ -601,7 +603,7 @@ async function fetchArtist(name) {
   if (adCache.has(key)) return adCache.get(key);
   const base = Object.values(ARTISTS).find(a => a.name.toLowerCase() === key) || { name };
   try {
-    const r = await fetch("https://theaudiodb.com/api/v1/json/2/search.php?s=" + encodeURIComponent(name), { signal: AbortSignal.timeout(6000) });
+    const r = await fetch("https://www.theaudiodb.com/api/v1/json/2/search.php?s=" + encodeURIComponent(name), { signal: AbortSignal.timeout(6000) });
     if (!r.ok) throw new Error("HTTP " + r.status);
     const data = (await r.json()).artists || [];
     let best = null, bestScore = -1;
