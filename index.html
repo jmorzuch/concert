@@ -413,7 +413,7 @@
         <div class="tc-head">
           <h2>Ranking</h2>
           <span class="sub" id="rankSub">—</span>
-          <span class="src">Sources: Spotify · Ticketmaster</span>
+          <span class="src">Sources: Deezer · Ticketmaster</span>
         </div>
         <div id="tableWrap">
           <table>
@@ -493,94 +493,81 @@ const ARTISTS = {
 };
 
 const MARKETS = [
-  {
-    id: "charleston", name: "Charleston, SC", sizeFactor: 0.72,
-    venues: [
-      { id: "nc-coliseum", name: "North Charleston Coliseum", capacity: 6000, basePrice: 82 },
-      { id: "riverfront",  name: "Riverfront Park Amphitheatre", capacity: 5500, basePrice: 68 },
-      { id: "civic",       name: "Charleston Civic Center", capacity: 3200, basePrice: 74 },
-      { id: "mainstage",   name: "The Main Stage", capacity: 850,  basePrice: 52 },
-    ],
-    artists: ["zachbryan","sabrina","teddy","chappell","benson","munilong","lucombs","jellll","doechii","noahk","shaboozey","lainey"],
-    shows: [
-      { artist: "zachbryan", venue: "riverfront",    status: "soldout", from: 145, to: 320 },
-      { artist: "sabrina",   venue: "nc-coliseum",   status: "soldout", from: 160, to: 410 },
-      { artist: "teddy",     venue: "nc-coliseum",   status: "fewleft", from: 95,  to: 260 },
-      { artist: "chappell",  venue: "civic",         status: "onsale",  from: 78,  to: 220 },
-      { artist: "benson",    venue: "riverfront",    status: "onsale",  from: 72,  to: 190 },
-      { artist: "doechii",   venue: "nc-coliseum",   status: "onsale",  from: 88,  to: 230 },
-      { artist: "noahk",     venue: "riverfront",    status: "onsale",  from: 85,  to: 210 },
-      { artist: "munilong",  venue: "mainstage",     status: "onsale",  from: 55,  to: 140 },
-    ],
-  },
-  {
-    id: "savannah", name: "Savannah, GA", sizeFactor: 0.62,
-    venues: [
-      { id: "tia",        name: "TIA Bank Pavilion", capacity: 5800, basePrice: 66 },
-      { id: "savtheatre", name: "Savannah Theatre",  capacity: 2200, basePrice: 70 },
-      { id: "cotton",     name: "The Cotton Exchange", capacity: 1200, basePrice: 58 },
-      { id: "midship",    name: "The Midship",       capacity: 900,  basePrice: 48 },
-    ],
-    artists: ["teddy","chappell","benson","lucombs","jellll","munilong","shaboozey","lainey","noahk","kenhurley"],
-    shows: [
-      { artist: "chappell", venue: "savtheatre", status: "fewleft", from: 82, to: 230 },
-      { artist: "teddy",    venue: "savtheatre", status: "onsale",  from: 75, to: 200 },
-      { artist: "jellll",   venue: "cotton",     status: "onsale",  from: 60, to: 165 },
-      { artist: "lucombs",  venue: "tia",        status: "onsale",  from: 70, to: 185 },
-      { artist: "munilong", venue: "midship",    status: "soldout", from: 50, to: 120 },
-    ],
-  },
-  {
-    id: "atlanta", name: "Atlanta, GA", sizeFactor: 1.25,
-    venues: [
-      { id: "statefarm",  name: "State Farm Arena", capacity: 18500, basePrice: 95 },
-      { id: "fairgrounds",name: "Georgia Fairground Arena", capacity: 35000, basePrice: 88 },
-      { id: "tabernacle", name: "The Tabernacle",   capacity: 850,  basePrice: 62 },
-      { id: "masquerade", name: "The Masquerade",   capacity: 550,  basePrice: 55 },
-    ],
-    artists: ["drake","sZA","kdot","triscott","post","billie","jcole","addison","kenhurley","doechii","oliviar","badbunny"],
-    shows: [
-      { artist: "drake",    venue: "statefarm",   status: "soldout", from: 180, to: 520 },
-      { artist: "sZA",      venue: "statefarm",   status: "soldout", from: 150, to: 440 },
-      { artist: "doechii",  venue: "tabernacle",  status: "fewleft", from: 70,  to: 180 },
-      { artist: "oliviar",  venue: "statefarm",   status: "onsale",  from: 120, to: 380 },
-      { artist: "addison",  venue: "fairgrounds", status: "onsale",  from: 95,  to: 260 },
-      { artist: "badbunny", venue: "fairgrounds", status: "onsale",  from: 140, to: 450 },
-    ],
-  },
-  {
-    id: "nashville", name: "Nashville, TN", sizeFactor: 1.1,
-    venues: [
-      { id: "bridgestone", name: "Bridgestone Arena", capacity: 20000, basePrice: 92 },
-      { id: "ryman",       name: "Ryman Auditorium",  capacity: 2363, basePrice: 110 },
-      { id: "station",     name: "The Station",       capacity: 1100, basePrice: 58 },
-    ],
-    artists: ["morganw","lucombs","lainey","shaboozey","jellll","benson","noahk","munilong","doechii","oliviar"],
-    shows: [
-      { artist: "morganw", venue: "bridgestone", status: "soldout", from: 165, to: 430 },
-      { artist: "lainey",  venue: "ryman",       status: "fewleft", from: 120, to: 320 },
-      { artist: "shaboozey",venue: "bridgestone",status: "onsale",  from: 110, to: 290 },
-      { artist: "jellll",  venue: "station",     status: "onsale",  from: 65,  to: 170 },
-      { artist: "benson",  venue: "bridgestone", status: "onsale",  from: 98,  to: 270 },
-    ],
-  },
-  {
-    id: "orlando", name: "Orlando, FL", sizeFactor: 1.05,
-    venues: [
-      { id: "amway",       name: "Amway Center",       capacity: 19000, basePrice: 90 },
-      { id: "drphillips",  name: "Dr. Phillips Center", capacity: 5600, basePrice: 78 },
-      { id: "plazalive",   name: "The Plaza Live",     capacity: 600,  basePrice: 52 },
-    ],
-    artists: ["karolg","badbunny","addison","post","billie","oliviar","munilong","doechii","triscott","taylors"],
-    shows: [
-      { artist: "karolg",   venue: "amway",       status: "soldout", from: 130, to: 390 },
-      { artist: "billie",   venue: "drphillips",  status: "fewleft", from: 105, to: 300 },
-      { artist: "addison",  venue: "amway",       status: "onsale",  from: 92,  to: 250 },
-      { artist: "munilong", venue: "plazalive",   status: "onsale",  from: 48,  to: 130 },
-      { artist: "oliviar",  venue: "drphillips",  status: "onsale",  from: 100, to: 280 },
-    ],
-  },
+  { id: "charleston", name: "Charleston, SC", city: "Charleston", state: "SC", sizeFactor: 0.72,
+    venueNames: ["Music Farm","North Charleston Coliseum","Bon Secours Wellness Arena","Credit One Stadium"],
+    artists: ["zachbryan","sabrina","teddy","chappell","benson","munilong","lucombs","jellll","doechii","noahk","shaboozey","lainey"] },
+  { id: "savannah", name: "Savannah, GA", city: "Savannah", state: "GA", sizeFactor: 0.62,
+    venueNames: ["The Senate","Savannah Civic Center - Johnny Mercer Theatre","Ameris Bank Amphitheatre"],
+    artists: ["teddy","chappell","benson","lucombs","jellll","munilong","shaboozey","lainey","noahk","kenhurley"] },
+  { id: "atlanta", name: "Atlanta, GA", city: "Atlanta", state: "GA", sizeFactor: 1.25,
+    venueNames: ["The Masquerade","The Tabernacle","Coca-Cola Roxy","Enmarket Arena","State Farm Arena","Lakewood Amphitheatre"],
+    artists: ["drake","sZA","kdot","triscott","post","billie","jcole","addison","kenhurley","doechii","oliviar","badbunny"] },
+  { id: "nashville", name: "Nashville, TN", city: "Nashville", state: "TN", sizeFactor: 1.1,
+    venueNames: ["The Bluebird Cafe","Brooklyn Bowl Nashville","Tennessee Theatre","Ascend Amphitheater","Bridgestone Arena"],
+    artists: ["morganw","lucombs","lainey","shaboozey","jellll","benson","noahk","munilong","doechii","oliviar"] },
+  { id: "orlando", name: "Orlando, FL", city: "Orlando", state: "FL", sizeFactor: 1.05,
+    venueNames: ["Hard Rock Live Orlando","Vystar Veterans Memorial Arena","Kia Center","Camping World Stadium"],
+    artists: ["karolg","badbunny","addison","post","billie","oliviar","munilong","doechii","triscott","taylors"] },
 ];
+
+/* Build a market's bookable-venue roster from its venue names, sizing each
+   via the public reference table (real capacities / base prices). This is the
+   stable pool the venue filter and the modeled "recommended venue" draw from. */
+function rosterFor(names) {
+  return (names || []).map(n => {
+    const est = estimateVenue(n);
+    return { id: n.toLowerCase().trim(), name: n, capacity: est.capacity, basePrice: est.basePrice };
+  }).sort((a,b) => a.capacity - b.capacity);
+}
+
+/* Representative venue sizes (public, well-known capacities) — used ONLY for
+   the modeled "est." attendance/revenue column. Live show cards never use these. */
+const VENUE_REF = {
+  "north charleston coliseum": {capacity:6000, basePrice:82},
+  "music farm": {capacity:2600, basePrice:70},
+  "credit one stadium": {capacity:20000, basePrice:100},
+  "bon secours wellness arena": {capacity:9000, basePrice:90},
+  "colonial life arena": {capacity:15000, basePrice:95},
+  "the senate": {capacity:2000, basePrice:75},
+  "the charleston music hall": {capacity:1500, basePrice:65},
+  "savannah civic center - johnny mercer theatre": {capacity:2200, basePrice:75},
+  "ameris bank amphitheatre": {capacity:6000, basePrice:70},
+  "atlanta symphony hall": {capacity:1900, basePrice:90},
+  "buckhead theatre": {capacity:1900, basePrice:75},
+  "center stage theater": {capacity:1500, basePrice:70},
+  "coca-cola roxy": {capacity:2100, basePrice:65},
+  "tabernacle": {capacity:850, basePrice:62},
+  "the masquerade": {capacity:900, basePrice:60},
+  "state farm arena": {capacity:18500, basePrice:95},
+  "lakewood amphitheatre": {capacity:16000, basePrice:80},
+  "enmarket arena": {capacity:8000, basePrice:85},
+  "gas south arena": {capacity:14000, basePrice:90},
+  "bridgestone arena": {capacity:20000, basePrice:92},
+  "nissan stadium": {capacity:50000, basePrice:110},
+  "ascend amphitheater": {capacity:15000, basePrice:85},
+  "brooklyn bowl nashville": {capacity:1200, basePrice:55},
+  "tennessee theatre": {capacity:1900, basePrice:75},
+  "bijou theatre": {capacity:2000, basePrice:70},
+  "the bluebird cafe": {capacity:110, basePrice:30},
+  "hard rock live orlando": {capacity:1000, basePrice:85},
+  "kia center": {capacity:19000, basePrice:90},
+  "camping world stadium": {capacity:60000, basePrice:105},
+  "hertz arena": {capacity:15000, basePrice:90},
+  "the st. augustine amphitheatre": {capacity:12000, basePrice:85},
+  "vystar veterans memorial arena": {capacity:10000, basePrice:90},
+  "au-rene theater at the broward center": {capacity:1500, basePrice:80},
+  "pensacola saenger theatre": {capacity:2400, basePrice:75},
+};
+function estimateVenue(name) {
+  const ref = VENUE_REF[(name || "").toLowerCase().trim()];
+  if (ref) return ref;
+  const n = (name || "").toLowerCase();
+  if (/stadium/.test(n)) return { capacity: 40000, basePrice: 100 };
+  if (/amphitheatre|amphitheater/.test(n)) return { capacity: 9000, basePrice: 78 };
+  if (/arena|center/.test(n)) return { capacity: 10000, basePrice: 90 };
+  if (/hall|theatre|theater|cafe|caf|bowl|stage|exchange|midship|basement|roxy|senate|bluebird|station/.test(n)) return { capacity: 1500, basePrice: 65 };
+  return { capacity: 3000, basePrice: 70 };
+}
 
 /* ── Derived-metric engine ────────────────────────────────────────── */
 const followerBoost = f => Math.min(1, Math.log10(f) / 8);           // 100M followers → 1
@@ -602,24 +589,23 @@ function estRevenue(attendance, basePrice, demand) {
   return Math.round(attendance * avg / 1000) * 1000;
 }
 
-/* ── Artist data: Deezer live, bundled snapshot as fallback ───────── */
+/* ── Artist data: Deezer live (no key), snapshot as fallback ──────── */
 const dzPopularity = fans =>
   fans >= 1e7 ? 97 : fans >= 5e6 ? 93 : fans >= 2.5e6 ? 88 : fans >= 1e6 ? 82 : 75;
 
 const dzCache = new Map();   // key: lowercased name
-async function fetchSpotifyArtist(id) {
-  const base = ARTISTS[id];
-  const key = base.name.toLowerCase();
+async function fetchArtist(name) {
+  const key = name.toLowerCase().trim();
   if (dzCache.has(key)) return dzCache.get(key);
+  const base = Object.values(ARTISTS).find(a => a.name.toLowerCase() === key) || { name };
   try {
-    const r = await fetch("https://api.deezer.com/search/artist?q=" + encodeURIComponent(base.name) + "&limit=3", { signal: AbortSignal.timeout(6000) });
+    const r = await fetch("https://api.deezer.com/search/artist?q=" + encodeURIComponent(name) + "&limit=3", { signal: AbortSignal.timeout(6000) });
     if (!r.ok) throw new Error("HTTP " + r.status);
     const data = (await r.json()).data || [];
     let best = null, bestScore = -1;
     for (const d of data) {
       if (!d.nb_fan) continue;
-      // fuzzy score: exact match wins, otherwise shared-token overlap
-      const dn = d.name.toLowerCase(), bn = base.name.toLowerCase();
+      const dn = d.name.toLowerCase(), bn = key;
       let score;
       if (dn === bn) score = 4;
       else {
@@ -631,8 +617,7 @@ async function fetchSpotifyArtist(id) {
     }
     if (!best || bestScore < 2) throw new Error("no confident match");
     const artist = {
-      id: base.id,
-      name: base.name,
+      name,
       followers: best.nb_fan,
       popularity: dzPopularity(best.nb_fan),
       photo: best.picture_big || best.picture_medium || null,
@@ -641,24 +626,77 @@ async function fetchSpotifyArtist(id) {
     dzCache.set(key, artist);
     return artist;
   } catch (e) {
-    dzCache.set(key, base);   // offline / no match → bundled numbers
-    return base;
+    dzCache.set(key, { ...base, source: "snapshot" });   // offline / no match
+    return dzCache.get(key);
   }
 }
-function fetchTicketmasterMarket(marketId, venueIds) {
-  return new Promise(res => {
-    setTimeout(() => {
-      const m = MARKETS.find(x => x.id === marketId);
-      const vIn = v => venueIds.length === 0 || venueIds.includes(v.id);       // venues are objects
-      const sIn = s => venueIds.length === 0 || venueIds.includes(s.venue);    // shows carry venue id strings
-      res({
-        market: m,
-        venues: m.venues.filter(vIn),
-        shows: m.shows.filter(sIn),
-        artists: m.artists,
-      });
-    }, 180);
+
+/* ── Ticketmaster Discovery v2 (LIVE) — shows, venues, sale windows ──
+   Consumer key lives here for this single-file build. For production,
+   proxy these calls server-side and keep the key out of the client.
+   v2 no longer exposes ticket status/price/venue capacity (that was the
+   retired v1 endpoint, now HTTP 410), so:
+     • status  → derived from the public sale window
+     • price   → not shown (no reliable source; not fabricated)
+     • capacity→ public reference estimate (modeled column only)           */
+/* Ticketmaster Discovery consumer key (free tier: 5k calls/day, 5 rps).
+   Hardcoded — this is a public app-identifier key for the browser API,
+   and the repo is private. Rotate via the Ticketmaster portal if leaked. */
+const TM_KEY = "7nHOl3qWffxqAMpQRbgW2KhGAgYpq3Op";
+const TM = "https://app.ticketmaster.com/discovery/v2/events.json";
+
+function saleStatus(sale, nowIso) {
+  if (!sale) return { label: "On Sale", cls: "onsale" };
+  const start = sale.startDateTime, end = sale.endDateTime;
+  const now = nowIso || new Date().toISOString();
+  if (start && start > now) return { label: "Opens Soon", cls: "fewleft" };
+  if (end && end <= now)  return { label: "Ended", cls: "soldout" };
+  return { label: "On Sale", cls: "onsale" };
+}
+
+async function fetchTicketmasterMarket(market) {
+  const now = new Date().toISOString().replace(/\.\d+Z$/, "Z");   // DIS1015: no ms
+  const params = new URLSearchParams({
+    apikey: TM_KEY,
+    city: market.city,
+    stateCode: market.state,
+    startDateTime: now,
+    sort: "date,asc",
+    size: "60",          // v2 ignores classify=concerts & returns sports/theatre too — pull more, filter below
   });
+  try {
+    const r = await fetch(TM + "?" + params.toString(), { signal: AbortSignal.timeout(9000) });
+    if (!r.ok) throw new Error("Ticketmaster HTTP " + r.status);
+    const d = await r.json();
+    const raw = (d._embedded && d._embedded.events) || [];
+    // v2 returns ALL segments (Music/Sports/Theatre/Film); classify=concerts is ignored.
+    // Keep only real concerts: primary classification segment === "Music".
+    const isMusic = e => {
+      const c = (e.classifications && e.classifications[0]) || null;
+      if (!c) return true;                 // no classification → let it through rather than drop
+      const seg = (c.segment && c.segment.name) || "";
+      return seg === "Music";
+    };
+    const shows = raw.filter(isMusic).map(e => {
+      const att = (e._embedded && e._embedded.attractions && e._embedded.attractions[0] && e._embedded.attractions[0].name) || e.name;
+      const ven = (e._embedded && e._embedded.venues && e._embedded.venues[0]) || {};
+      const imgs = (e.images || []);
+      const photo = imgs.length ? imgs[imgs.length - 1].url : null;
+      const pub = (e.sales && e.sales.public) || null;
+      return {
+        artistName: att,
+        venueName: ven.name,
+        city: (ven.city && ven.city.name) || market.city,
+        date: (e.dates && e.dates.start && e.dates.start.localDate) || null,
+        photo,
+        saleStart: pub ? pub.startDateTime : null,
+        status: saleStatus(pub, now),
+      };
+    }).filter(s => s.artistName && s.artistName !== "None" && s.venueName);
+    return { market, shows };
+  } catch (e) {
+    return { market, shows: [], error: e.message };
+  }
 }
 
 /* ── Formatting helpers ───────────────────────────────────────────── */
@@ -702,14 +740,15 @@ function buildMarketSelect() {
 
 function renderVenues() {
   const m = MARKETS.find(x => x.id === state.marketId);
+  const roster = rosterFor(m.venueNames);
   const all = state.venues.length === 0;
   $("#venueMenu").innerHTML =
     `<label class="msel-opt"><input type="checkbox" ${all ? "checked" : ""} data-v="__all"> All venues</label>` +
-    m.venues.map(v =>
+    roster.map(v =>
       `<label class="msel-opt"><input type="checkbox" ${state.venues.includes(v.id) ? "checked" : ""} data-v="${v.id}">
          <span>${v.name}</span><span class="cap">${fmtNum(v.capacity)}</span></label>`
     ).join("");
-  $("#venueBtnLabel").textContent = all ? `All venues (${m.venues.length})` :
+  $("#venueBtnLabel").textContent = all ? `All venues (${roster.length})` :
     state.venues.length + (state.venues.length === 1 ? " venue" : " venues");
 }
 
@@ -749,66 +788,81 @@ function skeletonTable() {
 }
 
 let renderSeq = 0;
+const fmtDate = d => d ? new Date(d + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
+
 async function refresh() {
   const seq = ++renderSeq;
   skeletonFeatured(); skeletonTable();
-  const tm = await fetchTicketmasterMarket(state.marketId, state.venues);
+  const m = MARKETS.find(x => x.id === state.marketId);
+  const roster = rosterFor(m.venueNames);
+  const scopeIds = state.venues.length ? state.venues : roster.map(v => v.id);
+
+  /* LIVE: upcoming shows in this market from Ticketmaster */
+  const tm = await fetchTicketmasterMarket(m);
   if (seq !== renderSeq) return;
 
-  const m = tm.market;
-  const venues = tm.venues.length ? tm.venues : m.venues;
-
-  /* Load live artist data (Deezer) for every artist in scope, in parallel */
-  const ids = Array.from(new Set([...m.artists, ...tm.shows.map(s => s.artist)]));
-  const loaded = await Promise.all(ids.map(fetchSpotifyArtist));
-  const A = {};
-  ids.forEach((id, i) => A[id] = loaded[i]);
+  /* LIVE: artist photos + fan counts from Deezer for the table roster */
+  const names = m.artists.map(id => ARTISTS[id].name);
+  const loaded = await Promise.all(names.map(fetchArtist));
+  const byName = {};
+  names.forEach((n, i) => byName[n] = loaded[i]);
   if (seq !== renderSeq) return;   // stale after await
 
-  /* Featured: top shows in scope, by artist popularity */
-  const shows = [...tm.shows]
-    .map(s => ({ ...s, artist: A[s.artist], venue: m.venues.find(v => v.id === s.venue) }))
-    .sort((a,b) => b.artist.popularity - a.artist.popularity)
-    .slice(0, 2);
+  const inScope = s => scopeIds.includes((s.venueName || "").toLowerCase().trim());
+  const scoped = tm.shows.filter(inScope);
+
+  /* ── Featured: top live shows in scope, ranked by Deezer artist popularity ── */
+  let shows = scoped.map(s => {
+    const a = byName[s.artistName] || Object.values(byName).find(x => x && x.name === s.artistName);
+    return { ...s, artist: a };
+  });
+  shows.sort((a, b) => (b.artist ? b.artist.popularity : 0) - (a.artist ? a.artist.popularity : 0));
+  shows = shows.slice(0, 2);
 
   const grid = $("#featuredGrid");
-  if (!shows.length) {
+  if (tm.error) {
     grid.innerHTML = `<div class="card" style="padding:22px;grid-column:1/-1;color:var(--muted)">
-      No shows in the selected venues for this market yet.</div>`;
+      Live ticketing feed unavailable (${tm.error}). Modeled recommendations below are still current.</div>`;
+  } else if (!shows.length) {
+    grid.innerHTML = `<div class="card" style="padding:22px;grid-column:1/-1;color:var(--muted)">
+      No upcoming shows at the selected ${scopeIds.length === roster.length ? "" : "venues in the "}market yet.</div>`;
   } else {
-    grid.innerHTML = shows.map((s,i) => {
-      const st = STATUS[s.status];
+    grid.innerHTML = shows.map((s, i) => {
+      const st = STATUS[s.status.cls] || STATUS.onsale;
+      const tracked = !!s.artist;
+      const tag = tracked ? `№ ${i + 1} tracked draw` : `№ ${i + 1} live draw`;
+      const fol = s.artist ? fmtFol(s.artist.followers) + " " + (s.artist.source === "deezer" ? "Deezer fans" : "followers") : "";
       return `<div class="card show-card">
-        <div class="show-photo"><img src="${s.artist.photo || artistAvatar(s.artist.name)}" alt="${s.artist.name}" onerror="this.remove();this.parentNode.style.background='linear-gradient(135deg,#7C3AED,#A855F7)'"></div>
+        <div class="show-photo"><img src="${s.photo || (s.artist && s.artist.photo) || artistAvatar(s.artistName)}" alt="${s.artistName}" onerror="this.remove();this.parentNode.style.background='linear-gradient(135deg,#7C3AED,#A855F7)'></div>
         <div class="show-info">
-          <div class="rank-tag">${i === 0 ? "№ 1 regional draw" : "№ 2 regional draw"}</div>
-          <h3>${s.artist.name}</h3>
-          <div class="followers">${fmtFol(s.artist.followers)} ${s.artist.source === "deezer" ? "Deezer fans" : "followers"} · demand score ${s.artist.popularity}</div>
+          <div class="rank-tag" ${tracked ? "" : 'style="opacity:.75"'}>${tag}</div>
+          <h3>${s.artistName}</h3>
+          <div class="followers">${fol ? fol + " · " : ""}${fmtDate(s.date)}${s.artist ? " · demand score " + s.artist.popularity : " · not yet tracked"}</div>
           <div class="venue-line">
             <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 21s-7-5.5-7-11a7 7 0 1 1 14 0c0 5.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
-            ${s.venue.name} — ${m.name}
+            ${s.venueName} — ${m.name}
           </div>
         </div>
         <div class="show-status">
           <span class="status-pill ${st.cls}">${st.label}</span>
-          <span class="price">$${s.from}–$${s.to}</span>
+          <span class="price" style="color:var(--muted)">live feed</span>
         </div>
       </div>`;
     }).join("");
   }
-  $("#showsSub").textContent = `${m.name} · ${venues.length} venue${venues.length===1?"":"s"} in scope`;
+  $("#showsSub").textContent = `${m.name} · ${scoped.length || tm.shows.length} live show${(scoped.length || tm.shows.length) === 1 ? "" : "s"} in scope`;
 
-  /* Recommended table: every artist in market, demand-ranked */
+  /* ── Recommended table: every tracked artist, demand-ranked (modeled metrics) ── */
   const rows = m.artists.map(id => {
-    const a = A[id];
+    const a = byName[ARTISTS[id].name] || ARTISTS[id];
     const demand = artistDemand(a.popularity, a.followers);
-    const venue = venueForDemand(demand, venues);
+    const venue = venueForDemand(demand, scopeIds.map(id2 => roster.find(v => v.id === id2)).filter(Boolean));
     const att = estAttendance(venue.capacity, demand, m.sizeFactor);
     const rev = estRevenue(att, venue.basePrice, demand);
     return { a, demand, venue, att, rev };
-  }).sort((x,y) => y.demand - x.demand).slice(0, 8);
+  }).sort((x, y) => y.demand - x.demand).slice(0, 8);
 
-  $("#artistTbody").innerHTML = rows.map((r,i) => `
+  $("#artistTbody").innerHTML = rows.map((r, i) => `
     <tr>
       <td><div class="artist-cell">
         <span class="rank-num">${i+1}</span>
@@ -823,9 +877,9 @@ async function refresh() {
 
   const scope = state.venues.length
     ? state.venues.length + (state.venues.length === 1 ? " selected venue" : " selected venues")
-    : "all " + m.venues.length + " venues";
+    : "all " + roster.length + " venues";
   $("#filterSummary").textContent = `${m.name} · ${scope} · ${m.artists.length} artists tracked`;
-  $("#showsSub").textContent = `${m.name} · ${venues.length} venue${venues.length===1?"":"s"} in scope`;
+  $("#showsSub").textContent = `${m.name} · ${scoped.length || tm.shows.length} live show${(scoped.length || tm.shows.length) === 1 ? "" : "s"} in scope`;
   $("#rankSub").textContent = `${rows.length} artists · ${scope}`;
   $("#tableSub").textContent = `${m.name} · ${scope}`;
 }
