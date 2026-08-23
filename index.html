@@ -413,7 +413,7 @@
         <div class="tc-head">
           <h2>Ranking</h2>
           <span class="sub" id="rankSub">—</span>
-          <span class="src">Sources: Deezer · Ticketmaster</span>
+          <span class="src">Sources: TheAudiodb · Ticketmaster</span>
         </div>
         <div id="tableWrap">
           <table>
@@ -433,7 +433,7 @@
 
       <p class="footnote" id="footnote">
         <b>How the numbers are derived:</b> raw "tickets sold" and "venue occupancy" aren't exposed by public APIs.
-        <b>Artist Demand</b> blends Spotify popularity (0–100) with a log-scaled follower signal.
+        <b>Artist Demand</b> blends a log-scaled global-fan signal (TheAudiodb) with a derived 0–100 popularity score.
         <b>Est. Attendance</b> = venue capacity × demand curve × market-size factor.
         <b>Est. Revenue</b> = attendance × venue base price × demand premium. Treat all three as planning estimates, not forecasts of record.
       </p>
@@ -449,16 +449,18 @@
 <script>
 /* ════════════════════════════════════════════════════════════════════
    DATA LAYER
-   Live artist data (name, photo, fan count) comes from the
-   Deezer API — https://api.deezer.com/search/artist?q=<name>
-   No API key, no auth, CORS-open. Deezer has no Spotify-style
-   0–100 popularity field, so the popularity score shown is
-   derived from log-scaled fan count (documented in the UI).
-   Touring/ticketing data (venues, shows, status, prices) is the
-   bundled market snapshot — swap fetchTicketmasterMarket for
-   real Ticketmaster Discovery calls when a consumer key exists.
-   Every lookup degrades to the bundled snapshot if the network
-   or Deezer is unavailable, so the dashboard never breaks.
+   Live artist data (name, photo, fan count) comes from TheAudiodb —
+   https://theaudiodb.com/api/v1/json/2/search.php?s=<name>  (free key 2)
+   CORS-open (Access-Control-Allow-Origin: *), real intFollowers counts
+   and CDN artist images. Deezer was retired from this app: it now
+   serves Access-Control-Allow-Credentials without
+   Access-Control-Allow-Origin, which browsers reject.
+   There is no 0–100 popularity field, so the popularity score shown is
+   derived from log-scaled follower count (documented in the UI).
+   Touring/ticketing data (venues, shows, status) is live from
+   Ticketmaster Discovery v2 (see fetchTicketmasterMarket below).
+   Every lookup degrades to the bundled snapshot if the network or
+   TheAudiodb is unavailable, so the dashboard never breaks.
    ════════════════════════════════════════════════════════════════ */
 
 const ARTISTS = {
@@ -589,45 +591,50 @@ function estRevenue(attendance, basePrice, demand) {
   return Math.round(attendance * avg / 1000) * 1000;
 }
 
-/* ── Artist data: Deezer live (no key), snapshot as fallback ──────── */
-const dzPopularity = fans =>
+/* ── Artist data: TheAudiodb live (free key), snapshot as fallback ──── */
+const adPopularity = fans =>
   fans >= 1e7 ? 97 : fans >= 5e6 ? 93 : fans >= 2.5e6 ? 88 : fans >= 1e6 ? 82 : 75;
 
-const dzCache = new Map();   // key: lowercased name
+const adCache = new Map();   // key: lowercased name
 async function fetchArtist(name) {
   const key = name.toLowerCase().trim();
-  if (dzCache.has(key)) return dzCache.get(key);
+  if (adCache.has(key)) return adCache.get(key);
   const base = Object.values(ARTISTS).find(a => a.name.toLowerCase() === key) || { name };
   try {
-    const r = await fetch("https://api.deezer.com/search/artist?q=" + encodeURIComponent(name) + "&limit=3", { signal: AbortSignal.timeout(6000) });
+    const r = await fetch("https://theaudiodb.com/api/v1/json/2/search.php?s=" + encodeURIComponent(name), { signal: AbortSignal.timeout(6000) });
     if (!r.ok) throw new Error("HTTP " + r.status);
-    const data = (await r.json()).data || [];
+    const data = (await r.json()).artists || [];
     let best = null, bestScore = -1;
     for (const d of data) {
-      if (!d.nb_fan) continue;
-      const dn = d.name.toLowerCase(), bn = key;
+      const dn = (d.strArtist || "").toLowerCase();
+      if (!dn) continue;
       let score;
-      if (dn === bn) score = 4;
+      if (dn === key) score = 4;
       else {
-        const dt = dn.split(/[^a-z0-9']+/).filter(Boolean), bt = bn.split(/[^a-z0-9']+/).filter(Boolean);
+        const dt = dn.split(/[^a-z0-9']+/).filter(Boolean), bt = key.split(/[^a-z0-9']+/).filter(Boolean);
         const overlap = dt.filter(t => bt.includes(t)).length / Math.max(dt.length, 1);
         score = overlap >= 0.5 ? 3 : overlap >= 0.33 ? 2 : 1;
       }
       if (score > bestScore) { bestScore = score; best = d; }
     }
     if (!best || bestScore < 2) throw new Error("no confident match");
+    const followers = Number(best.intFollowers) || 0;
+    // TheAudiodb data is uneven (some real artists carry tiny/zero counts);
+    // an implausibly low count loses to the curated snapshot for that artist.
+    const useLive = followers >= 50000 || !base.followers;
+    if (!useLive) throw new Error("count below sanity floor");
     const artist = {
       name,
-      followers: best.nb_fan,
-      popularity: dzPopularity(best.nb_fan),
-      photo: best.picture_big || best.picture_medium || null,
-      source: "deezer",
+      followers,
+      popularity: adPopularity(followers),
+      photo: best.strArtistFanart || best.strArtistThumb || null,
+      source: "theaudiodb",
     };
-    dzCache.set(key, artist);
+    adCache.set(key, artist);
     return artist;
   } catch (e) {
-    dzCache.set(key, { ...base, source: "snapshot" });   // offline / no match
-    return dzCache.get(key);
+    adCache.set(key, { ...base, source: "snapshot" });   // offline / no match
+    return adCache.get(key);
   }
 }
 
@@ -709,7 +716,7 @@ const STATUS = {
   onsale:  { label: "On Sale",  cls: "onsale"  },
 };
 
-/* Deterministic gradient avatar from name (stands in for Spotify image) */
+/* Deterministic gradient avatar from name (fallback when no photo loads) */
 function artistAvatar(name) {
   let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) % 360;
   const initials = name.split(" ").map(w => w[0]).slice(0,2).join("");
@@ -801,7 +808,7 @@ async function refresh() {
   const tm = await fetchTicketmasterMarket(m);
   if (seq !== renderSeq) return;
 
-  /* LIVE: artist photos + fan counts from Deezer for the table roster */
+  /* LIVE: artist photos + fan counts from TheAudiodb for the table roster */
   const names = m.artists.map(id => ARTISTS[id].name);
   const loaded = await Promise.all(names.map(fetchArtist));
   const byName = {};
@@ -811,7 +818,7 @@ async function refresh() {
   const inScope = s => scopeIds.includes((s.venueName || "").toLowerCase().trim());
   const scoped = tm.shows.filter(inScope);
 
-  /* ── Featured: top live shows in scope, ranked by Deezer artist popularity ── */
+  /* ── Featured: top live shows in scope, ranked by artist popularity ── */
   let shows = scoped.map(s => {
     const a = byName[s.artistName] || Object.values(byName).find(x => x && x.name === s.artistName);
     return { ...s, artist: a };
@@ -831,7 +838,7 @@ async function refresh() {
       const st = STATUS[s.status.cls] || STATUS.onsale;
       const tracked = !!s.artist;
       const tag = tracked ? `№ ${i + 1} tracked draw` : `№ ${i + 1} live draw`;
-      const fol = s.artist ? fmtFol(s.artist.followers) + " " + (s.artist.source === "deezer" ? "Deezer fans" : "followers") : "";
+      const fol = s.artist ? fmtFol(s.artist.followers) + " " + (s.artist.source === "theaudiodb" ? "global fans" : "followers") : "";
       return `<div class="card show-card">
         <div class="show-photo"><img src="${s.photo || (s.artist && s.artist.photo) || artistAvatar(s.artistName)}" alt="${s.artistName}" onerror="this.remove();this.parentNode.style.background='linear-gradient(135deg,#7C3AED,#A855F7)'></div>
         <div class="show-info">
@@ -867,7 +874,7 @@ async function refresh() {
       <td><div class="artist-cell">
         <span class="rank-num">${i+1}</span>
         <span class="a-photo"><img src="${r.a.photo || artistAvatar(r.a.name)}" alt="${r.a.name}" onerror="this.remove()"></span>
-        <span><span class="a-name">${r.a.name}</span><span class="a-fol">${fmtFol(r.a.followers)} ${r.a.source === "deezer" ? "Deezer fans" : "followers"}</span></span>
+        <span><span class="a-name">${r.a.name}</span><span class="a-fol">${fmtFol(r.a.followers)} ${r.a.source === "theaudiodb" ? "global fans" : "followers"}</span></span>
       </div></td>
       <td><span class="demand-pill"><span class="spark"></span>${r.demand}%</span></td>
       <td class="num">${fmtNum(r.att)}<span class="sub2">${r.venue.name.split(" ").slice(-1)[0]} cap ${fmtNum(r.venue.capacity)}</span></td>
