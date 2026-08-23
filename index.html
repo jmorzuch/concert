@@ -449,15 +449,17 @@
 <script>
 /* ════════════════════════════════════════════════════════════════════
    DATA LAYER
-   In production, `fetchMarketData()` would call:
-     • Spotify Web API  — GET /v1/artists/{id}  (name, image, followers, popularity)
-     • Ticketmaster API — GET /discovery/events  (venues, shows, status, prices)
-   with the market + venue filters below. No API keys are configured in
-   this build, so both calls resolve to the bundled snapshot dataset
-   (same shapes as the live APIs) after a short simulated latency.
-   Swap the bodies of fetchSpotifyArtist / fetchTicketmasterMarket for
-   real fetch() calls and everything downstream works unchanged.
-   ════════════════════════════════════════════════════════════════════ */
+   Live artist data (name, photo, fan count) comes from the
+   Deezer API — https://api.deezer.com/search/artist?q=<name>
+   No API key, no auth, CORS-open. Deezer has no Spotify-style
+   0–100 popularity field, so the popularity score shown is
+   derived from log-scaled fan count (documented in the UI).
+   Touring/ticketing data (venues, shows, status, prices) is the
+   bundled market snapshot — swap fetchTicketmasterMarket for
+   real Ticketmaster Discovery calls when a consumer key exists.
+   Every lookup degrades to the bundled snapshot if the network
+   or Deezer is unavailable, so the dashboard never breaks.
+   ════════════════════════════════════════════════════════════════ */
 
 const ARTISTS = {
   zachbryan:   { name: "Zach Bryan",       followers: 15400000, popularity: 94 },
@@ -600,9 +602,48 @@ function estRevenue(attendance, basePrice, demand) {
   return Math.round(attendance * avg / 1000) * 1000;
 }
 
-/* ── Simulated API (swap for real Spotify + Ticketmaster calls) ───── */
-function fetchSpotifyArtist(id) {
-  return new Promise(res => setTimeout(() => res(ARTISTS[id]), 120));
+/* ── Artist data: Deezer live, bundled snapshot as fallback ───────── */
+const dzPopularity = fans =>
+  fans >= 1e7 ? 97 : fans >= 5e6 ? 93 : fans >= 2.5e6 ? 88 : fans >= 1e6 ? 82 : 75;
+
+const dzCache = new Map();   // key: lowercased name
+async function fetchSpotifyArtist(id) {
+  const base = ARTISTS[id];
+  const key = base.name.toLowerCase();
+  if (dzCache.has(key)) return dzCache.get(key);
+  try {
+    const r = await fetch("https://api.deezer.com/search/artist?q=" + encodeURIComponent(base.name) + "&limit=3", { signal: AbortSignal.timeout(6000) });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const data = (await r.json()).data || [];
+    let best = null, bestScore = -1;
+    for (const d of data) {
+      if (!d.nb_fan) continue;
+      // fuzzy score: exact match wins, otherwise shared-token overlap
+      const dn = d.name.toLowerCase(), bn = base.name.toLowerCase();
+      let score;
+      if (dn === bn) score = 4;
+      else {
+        const dt = dn.split(/[^a-z0-9']+/).filter(Boolean), bt = bn.split(/[^a-z0-9']+/).filter(Boolean);
+        const overlap = dt.filter(t => bt.includes(t)).length / Math.max(dt.length, 1);
+        score = overlap >= 0.5 ? 3 : overlap >= 0.33 ? 2 : 1;
+      }
+      if (score > bestScore) { bestScore = score; best = d; }
+    }
+    if (!best || bestScore < 2) throw new Error("no confident match");
+    const artist = {
+      id: base.id,
+      name: base.name,
+      followers: best.nb_fan,
+      popularity: dzPopularity(best.nb_fan),
+      photo: best.picture_big || best.picture_medium || null,
+      source: "deezer",
+    };
+    dzCache.set(key, artist);
+    return artist;
+  } catch (e) {
+    dzCache.set(key, base);   // offline / no match → bundled numbers
+    return base;
+  }
 }
 function fetchTicketmasterMarket(marketId, venueIds) {
   return new Promise(res => {
@@ -711,17 +752,22 @@ let renderSeq = 0;
 async function refresh() {
   const seq = ++renderSeq;
   skeletonFeatured(); skeletonTable();
-  const [tm] = await Promise.all([
-    fetchTicketmasterMarket(state.marketId, state.venues),
-  ]);
+  const tm = await fetchTicketmasterMarket(state.marketId, state.venues);
   if (seq !== renderSeq) return;
 
   const m = tm.market;
   const venues = tm.venues.length ? tm.venues : m.venues;
 
+  /* Load live artist data (Deezer) for every artist in scope, in parallel */
+  const ids = Array.from(new Set([...m.artists, ...tm.shows.map(s => s.artist)]));
+  const loaded = await Promise.all(ids.map(fetchSpotifyArtist));
+  const A = {};
+  ids.forEach((id, i) => A[id] = loaded[i]);
+  if (seq !== renderSeq) return;   // stale after await
+
   /* Featured: top shows in scope, by artist popularity */
   const shows = [...tm.shows]
-    .map(s => ({ ...s, artist: ARTISTS[s.artist], venue: m.venues.find(v => v.id === s.venue) }))
+    .map(s => ({ ...s, artist: A[s.artist], venue: m.venues.find(v => v.id === s.venue) }))
     .sort((a,b) => b.artist.popularity - a.artist.popularity)
     .slice(0, 2);
 
@@ -733,11 +779,11 @@ async function refresh() {
     grid.innerHTML = shows.map((s,i) => {
       const st = STATUS[s.status];
       return `<div class="card show-card">
-        <div class="show-photo"><img src="${artistAvatar(s.artist.name)}" alt="${s.artist.name}"></div>
+        <div class="show-photo"><img src="${s.artist.photo || artistAvatar(s.artist.name)}" alt="${s.artist.name}" onerror="this.remove();this.parentNode.style.background='linear-gradient(135deg,#7C3AED,#A855F7)'"></div>
         <div class="show-info">
           <div class="rank-tag">${i === 0 ? "№ 1 regional draw" : "№ 2 regional draw"}</div>
           <h3>${s.artist.name}</h3>
-          <div class="followers">${fmtFol(s.artist.followers)} Spotify followers · pop ${s.artist.popularity}</div>
+          <div class="followers">${fmtFol(s.artist.followers)} ${s.artist.source === "deezer" ? "Deezer fans" : "followers"} · demand score ${s.artist.popularity}</div>
           <div class="venue-line">
             <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 21s-7-5.5-7-11a7 7 0 1 1 14 0c0 5.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
             ${s.venue.name} — ${m.name}
@@ -754,7 +800,7 @@ async function refresh() {
 
   /* Recommended table: every artist in market, demand-ranked */
   const rows = m.artists.map(id => {
-    const a = ARTISTS[id];
+    const a = A[id];
     const demand = artistDemand(a.popularity, a.followers);
     const venue = venueForDemand(demand, venues);
     const att = estAttendance(venue.capacity, demand, m.sizeFactor);
@@ -766,8 +812,8 @@ async function refresh() {
     <tr>
       <td><div class="artist-cell">
         <span class="rank-num">${i+1}</span>
-        <span class="a-photo"><img src="${artistAvatar(r.a.name)}" alt="${r.a.name}"></span>
-        <span><span class="a-name">${r.a.name}</span><span class="a-fol">${fmtFol(r.a.followers)} followers</span></span>
+        <span class="a-photo"><img src="${r.a.photo || artistAvatar(r.a.name)}" alt="${r.a.name}" onerror="this.remove()"></span>
+        <span><span class="a-name">${r.a.name}</span><span class="a-fol">${fmtFol(r.a.followers)} ${r.a.source === "deezer" ? "Deezer fans" : "followers"}</span></span>
       </div></td>
       <td><span class="demand-pill"><span class="spark"></span>${r.demand}%</span></td>
       <td class="num">${fmtNum(r.att)}<span class="sub2">${r.venue.name.split(" ").slice(-1)[0]} cap ${fmtNum(r.venue.capacity)}</span></td>
